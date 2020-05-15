@@ -300,6 +300,16 @@ func GetsockoptUint64(fd, level, opt int) (value uint64, err error) {
 	return n, err
 }
 
+// GetsockoptString returns the string value of the socket option opt for the
+// socket associated with fd at the given socket level.
+func GetsockoptString(fd, level, opt int) (string, error) {
+	buf, err := GetsockoptBytes(fd, level, opt)
+	if err != nil {
+		return "", err
+	}
+	return string(buf[:len(buf)-1]), err
+}
+
 func Recvfrom(fd int, p []byte, flags int) (n int, from Sockaddr, err error) {
 	var rsa RawSockaddrAny
 	var len _Socklen = SizeofSockaddrAny
@@ -347,6 +357,14 @@ func SetsockoptICMPv6Filter(fd, level, opt int, filter *ICMPv6Filter) error {
 
 func SetsockoptLinger(fd, level, opt int, l *Linger) (err error) {
 	return setsockopt(fd, level, opt, unsafe.Pointer(l), SizeofLinger)
+}
+
+func SetsockoptBytes(fd, level, opt int, b []byte) (err error) {
+	var p unsafe.Pointer
+	if len(b) > 0 {
+		p = unsafe.Pointer(&b[0])
+	}
+	return setsockopt(fd, level, opt, p, uintptr(len(b)))
 }
 
 func SetsockoptString(fd, level, opt int, s string) (err error) {

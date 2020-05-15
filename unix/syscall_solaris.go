@@ -131,16 +131,16 @@ func Getsockname(fd int) (sa Sockaddr, err error) {
 	return anyToSockaddr(fd, &rsa)
 }
 
-// GetsockoptString returns the string value of the socket option opt for the
+// GetsockoptBytes returns the byte buffer of the socket option opt for the
 // socket associated with fd at the given socket level.
-func GetsockoptString(fd, level, opt int) (string, error) {
+func GetsockoptBytes(fd, level, opt int) ([]byte, error) {
 	buf := make([]byte, 256)
 	vallen := _Socklen(len(buf))
 	err := getsockopt(fd, level, opt, unsafe.Pointer(&buf[0]), &vallen)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(buf[:vallen-1]), nil
+	return buf[:vallen], nil
 }
 
 const ImplementsGetwd = true
